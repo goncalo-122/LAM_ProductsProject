@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">project_Compras</string>
+    <string name="todos">Todos</string>
+    <string name="carrinho">Carrinho</string>
+    <string name="falta">Falta</string>
+    <string name="ordenar">Ordenar</string>
+    <string name="nomeP">Nome do Produto</string>
+    <string name="qtd">Quant</string>
+    <string name="refrescar">Refrescar</string>
+    <string name="noCarrinho">No Carrinho</string>
+</resources>
