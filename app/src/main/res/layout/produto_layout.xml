@@ -14,24 +14,27 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/nomeP"
+                android:id="@+id/productNameLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
+                android:gravity="center_horizontal"
                 android:text="@string/nomeP" />
 
             <TextView
-                android:id="@+id/qtd"
+                android:id="@+id/productQtdLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center_horizontal"
                 android:text="@string/qtd" />
 
             <TextView
-                android:id="@+id/noCarrinho"
+                android:id="@+id/productIsInCharLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center_horizontal"
                 android:text="@string/noCarrinho" />
         </LinearLayout>
         <LinearLayout
@@ -40,19 +43,18 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/nomePtxt"
+                android:id="@+id/productNameTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:text="" />
 
             <EditText
-                android:layout_width="wrap_content"
+                android:id="@+id/productQtdEditText"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:layout_marginRight="101dp"
-                android:id="@+id/qtdTxt"
-                >
+                android:layout_weight="1"
+                android:inputType="number">
 
             </EditText>
 
@@ -62,8 +64,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 />
-
-
         </LinearLayout>
     </LinearLayout>
 

@@ -10,15 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class MyViewHolder extends RecyclerView.ViewHolder {
 
-    TextView produtoTxt;
+    TextView productTxt;
     EditText qtdTxt;
-    CheckBox inCarrinho;
+    CheckBox inChart;
 
     public MyViewHolder(@NonNull View itemView) {
         super(itemView);
-        produtoTxt = itemView.findViewById(R.id.nomePtxt);
-        qtdTxt = itemView.findViewById(R.id.qtdTxt);
-        inCarrinho = itemView.findViewById(R.id.checkBox);
+        productTxt = itemView.findViewById(R.id.productNameTextView);
+        qtdTxt = itemView.findViewById(R.id.productQtdEditText);
+        inChart = itemView.findViewById(R.id.checkBox);
     }
 }
 

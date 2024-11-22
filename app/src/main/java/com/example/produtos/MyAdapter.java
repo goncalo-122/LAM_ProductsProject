@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,9 +14,9 @@ import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
-    private List<Produto> mDataset;
+    private List<Product> mDataset;
 
-    public MyAdapter(List<Produto> mDataset) {
+    public MyAdapter(List<Product> mDataset) {
         this.mDataset = mDataset;
     }
 
@@ -30,10 +31,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder holder, int position) {
-        Produto produto = mDataset.get(position);
-        holder.nomePT.setText(produto.getNomeP());
-        holder.qtdT.setText(String.valueOf(produto.getQtd()));
-        holder.noCarrinho.setChecked(produto.isNoCarrinho());
+        Product product = mDataset.get(position);
+        holder.nomePT.setText(product.getId());
+        holder.qtdT.setText(String.valueOf(product.getQtd()));
+        holder.noCarrinho.setChecked(product.isInChart());
     }
 
     @Override
@@ -43,13 +44,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView nomePT;
-        TextView qtdT;
+        EditText qtdT;
         CheckBox noCarrinho;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-            nomePT = itemView.findViewById(R.id.nomePtxt);
-            qtdT = itemView.findViewById(R.id.qtdTxt);
+            nomePT = itemView.findViewById(R.id.productNameTextView);
+            qtdT = itemView.findViewById(R.id.productQtdEditText);
             noCarrinho = itemView.findViewById(R.id.checkBox);
         }
     }

@@ -5,7 +5,7 @@
     <string name="falta">Falta</string>
     <string name="ordenar">Ordenar</string>
     <string name="nomeP">Nome do Produto</string>
-    <string name="qtd">Quant</string>
+    <string name="qtd">Qtd</string>
     <string name="refrescar">Refrescar</string>
     <string name="noCarrinho">No Carrinho</string>
 </resources>

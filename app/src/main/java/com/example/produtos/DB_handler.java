@@ -39,14 +39,14 @@ public class DB_handler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean adicionarProduto(Produto produto) {
+    public boolean adicionarProduto(Product product) {
         SQLiteDatabase db = null;
         try {
             db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(NOMEP, produto.getNomeP());
-            values.put(QTD, produto.getQtd());
-            values.put(NOCARRINHO, produto.isNoCarrinho() ? 1 : 0);
+            values.put(NOMEP, product.getDescr());
+            values.put(QTD, product.getQtd());
+            values.put(NOCARRINHO, product.isInChart()? 1 : 0);
 
             long result = db.insert(TABLE_NAME, null, values);
             return result != -1; // Retorna true se a inserção foi bem-sucedida
@@ -57,8 +57,8 @@ public class DB_handler extends SQLiteOpenHelper {
         }
     }
 
-    // Obter um único produto pelo ID
-    public Produto getProduto(int id) {
+
+    public Product getProduto(int id) {
         SQLiteDatabase db = null;
         Cursor cursor = null;
         try {
@@ -70,23 +70,22 @@ public class DB_handler extends SQLiteOpenHelper {
                     null, null, null);
 
             if (cursor != null && cursor.moveToFirst()) {
-                return new Produto(
+                return new Product(
                         cursor.getInt(cursor.getColumnIndexOrThrow(ID)),
                         cursor.getString(cursor.getColumnIndexOrThrow(NOMEP)),
                         cursor.getInt(cursor.getColumnIndexOrThrow(QTD)),
                         cursor.getInt(cursor.getColumnIndexOrThrow(NOCARRINHO)) == 1
                 );
             }
-            return null; // Retorna null se o produto não foi encontrado
+            return null;
         } finally {
             if (cursor != null) cursor.close();
             if (db != null && db.isOpen()) db.close();
         }
     }
 
-    // Obter lista de produtos
-    public List<Produto> listaProdutos() {
-        List<Produto> produtos = new ArrayList<>();
+    public List<Product> listaProdutos() {
+        List<Product> products = new ArrayList<>();
         SQLiteDatabase db = null;
         Cursor cursor = null;
         try {
@@ -96,23 +95,22 @@ public class DB_handler extends SQLiteOpenHelper {
 
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    Produto produto = new Produto(
+                    Product product = new Product(
                             cursor.getInt(cursor.getColumnIndexOrThrow(ID)),
                             cursor.getString(cursor.getColumnIndexOrThrow(NOMEP)),
                             cursor.getInt(cursor.getColumnIndexOrThrow(QTD)),
                             cursor.getInt(cursor.getColumnIndexOrThrow(NOCARRINHO)) == 1
                     );
-                    produtos.add(produto);
+                    products.add(product);
                 } while (cursor.moveToNext());
             }
         } finally {
             if (cursor != null) cursor.close();
             if (db != null && db.isOpen()) db.close();
         }
-        return produtos;
+        return products;
     }
 
-    // Atualizar produto
     public boolean updateProduto(int id, String novoNome, int novaQtd, boolean noCarrinho) {
         SQLiteDatabase db = null;
         try {
@@ -129,7 +127,6 @@ public class DB_handler extends SQLiteOpenHelper {
         }
     }
 
-    // Deletar produto
     public boolean deleteProduto(int id) {
         SQLiteDatabase db = null;
         try {
@@ -141,7 +138,7 @@ public class DB_handler extends SQLiteOpenHelper {
         }
     }
 
-    // Verificar se o banco de dados existe
+
     public boolean doesDatabaseExist(Context context) {
         SQLiteDatabase db = null;
         try {
