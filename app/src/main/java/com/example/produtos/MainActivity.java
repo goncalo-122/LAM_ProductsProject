@@ -1,10 +1,14 @@
 package com.example.produtos;
 
+import static android.content.ContentValues.TAG;
+
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayoutManager layoutManager;
     DB_handler db;
     ExecutorService executorService;
+    MyViewHolder vw;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +56,21 @@ public class MainActivity extends AppCompatActivity {
         loadProducts();
     }
 
+
+//private void addProduct(){
+//    if (vw.inChart.isChecked()){
+//        db.adicionarProduct(url,Integer.parseInt(String.valueOf(vw.qtdTxt.getText())),vw.inChart.isChecked());
+//    }
+//    else{
+//        db.adicionarProduct(url,Integer.parseInt(String.valueOf(vw.qtdTxt.getText())),vw.inChart.isEnabled());
+//    }
+//
+//}
+
     private void loadProducts() {
         executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
+            List<Product> products = db.listProducts();
+            Log.e(TAG,"MainActivity"+products);
             runOnUiThread(() -> {
                 if (products != null && !products.isEmpty()) {
                     listOfProducts.clear();
@@ -97,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void listNotChart(MenuItem item) {
         executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
+            List<Product> products = db.listProducts();
             List<Product> notInChart = filterProductsByChart(products, false);
             runOnUiThread(() -> {
                 updateProductList(notInChart);
@@ -108,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void listChart(MenuItem item) {
         executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
+            List<Product> products = db.listProducts();
             List<Product> inChart = filterProductsByChart(products, true);
             runOnUiThread(() -> {
                 updateProductList(inChart);
@@ -119,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void orderProducts(MenuItem item) {
         executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
+            List<Product> products = db.listProducts();
             Collections.sort(products, (p1, p2) -> p1.getDescr().compareToIgnoreCase(p2.getDescr()));
             runOnUiThread(() -> {
                 updateProductList(products);
