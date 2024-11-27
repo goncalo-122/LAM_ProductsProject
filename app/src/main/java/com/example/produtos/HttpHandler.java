@@ -1,7 +1,6 @@
 package com.example.produtos;
 
 
-
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -68,5 +67,4 @@ class HttpHandler {
         return sb.toString();
     }
 }
-
 
