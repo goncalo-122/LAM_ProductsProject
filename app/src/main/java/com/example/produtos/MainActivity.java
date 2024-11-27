@@ -53,101 +53,45 @@ public class MainActivity extends AppCompatActivity {
 
         executorService = Executors.newCachedThreadPool();
 
-        loadProducts();
+        listarProd();
+    }
+    private void listarProd() {
+        Prod();
+        List<Product> products = db.listProducts();
+        myAdapter = new MyAdapter(products);
+        recyclerView.setAdapter(myAdapter);
     }
 
-
-//private void addProduct(){
-//    if (vw.inChart.isChecked()){
-//        db.adicionarProduct(url,Integer.parseInt(String.valueOf(vw.qtdTxt.getText())),vw.inChart.isChecked());
+    private void Prod() {
+           db.adicionarListaInicialDeProdutos(url);
+    }
+//    private void addDetalhesProd() {
+//        List<Product> products = db.listProducts();
+//        for(Product p:products){
+//            db.updateProduto(p.getId(),p.getQtd(),p.isInChart());
+//        }
+//        db.updateProduto();
 //    }
-//    else{
-//        db.adicionarProduct(url,Integer.parseInt(String.valueOf(vw.qtdTxt.getText())),vw.inChart.isEnabled());
-//    }
-//
-//}
 
-    private void loadProducts() {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts();
-            Log.e(TAG,"MainActivity"+products);
-            runOnUiThread(() -> {
-                if (products != null && !products.isEmpty()) {
-                    listOfProducts.clear();
-                    listOfProducts.addAll(products);
-                    myAdapter.notifyDataSetChanged();
-                    Toast.makeText(MainActivity.this, "Produtos carregados com sucesso!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.d("loadProducts", "Nenhum produto encontrado.");
-                    Toast.makeText(MainActivity.this, "Nenhum produto encontrado.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+    public void listAll(MenuItem item) {
+        List<Product> contactos = db.listProducts();
+        myAdapter = new MyAdapter(contactos);
+        recyclerView.setAdapter(myAdapter);
     }
-
-    private void updateProductList(List<Product> products) {
-        listOfProducts.clear();
-        listOfProducts.addAll(products);
-        myAdapter.notifyDataSetChanged();
-    }
-
-    private List<Product> filterProductsByChart(List<Product> products, boolean inChart) {
-        List<Product> filtered = new ArrayList<>();
-        for (Product product : products) {
-            if (product.isInChart() == inChart) {
-                filtered.add(product);
-            }
-        }
-        return filtered;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_layout, menu);
-        return true;
-    }
-
-    public void listProd(MenuItem item) {
-        loadProducts();
-    }
-
     public void listNotChart(MenuItem item) {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts();
-            List<Product> notInChart = filterProductsByChart(products, false);
-            runOnUiThread(() -> {
-                updateProductList(notInChart);
-                Log.d("listNotChart", "Exibindo produtos fora do carrinho.");
-            });
-        });
+
     }
 
     public void listChart(MenuItem item) {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts();
-            List<Product> inChart = filterProductsByChart(products, true);
-            runOnUiThread(() -> {
-                updateProductList(inChart);
-                Log.d("listChart", "Exibindo produtos no carrinho.");
-            });
-        });
+
     }
 
     public void orderProducts(MenuItem item) {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts();
-            Collections.sort(products, (p1, p2) -> p1.getDescr().compareToIgnoreCase(p2.getDescr()));
-            runOnUiThread(() -> {
-                updateProductList(products);
-                Log.d("orderProducts", "Produtos ordenados por nome.");
-            });
-        });
+
     }
 
     public void refresh(MenuItem item) {
-        loadProducts();
-        Log.d("refresh", "Lista de produtos atualizada.");
+        listarProd();
     }
 
     @Override

@@ -36,9 +36,10 @@ public class DB_handler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_PRODUTOS_TABLE = "CREATE TABLE " + TABLE_NAME + "("
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + DESCR+"TEXT NOT NULL, "
+                + DESCR + " TEXT NOT NULL, "
                 + QTD + " INTEGER DEFAULT 0 NOT NULL, "
-                + NOCARRINHO + " BOOLEAN DEFAULT FALSE NOT NULL)";
+                + NOCARRINHO + " INTEGER DEFAULT 0 NOT NULL)";
+
         db.execSQL(CREATE_PRODUTOS_TABLE);
     }
 
@@ -47,20 +48,6 @@ public class DB_handler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
-
-
-//    public String NomeProducts(String url) {
-//        HttpHandler httpHandler = new HttpHandler();
-//        String resposta = httpHandler.lerInformacao(url);  // Recebe a resposta da API (nome do produto)
-//
-//
-//        return nomeProduto;
-//    }
-
-
-
-
-
 
 
 
@@ -92,6 +79,25 @@ public class DB_handler extends SQLiteOpenHelper {
             return products;
         }
 
+
+    public boolean updateProduto(int id, int novaQtd,boolean noCarrinho) {
+        SQLiteDatabase db = null;
+        try {
+            db = this.getWritableDatabase();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(QTD, novaQtd);
+            contentValues.put(NOCARRINHO, noCarrinho);
+
+            String whereClause = ID + " = ?";
+            String[] whereArgs = new String[]{String.valueOf(id)};
+            int rowsAffected = db.update(TABLE_NAME, contentValues, whereClause, whereArgs);
+            return rowsAffected > 0;
+        } finally {
+            if (db != null && db.isOpen()) db.close();
+        }
+    }
+
+
         public void adicionarListaInicialDeProdutos(String url) {
             HttpHandler httpHandler = new HttpHandler();
             String productsList = httpHandler.lerInformacao(url);
@@ -101,14 +107,16 @@ public class DB_handler extends SQLiteOpenHelper {
             try {
                 db = this.getWritableDatabase();
                 BufferedReader br = new BufferedReader(new StringReader(productsList));
+
+
+
                 String nomeProduto;
                 ContentValues values;
                 long result;
                 while((nomeProduto = br.readLine()) != null) {
-                    // Prepara os valores a serem inseridos
+
                     values = new ContentValues();
-                    values.put(DESCR, nomeProduto);  // Coluna nomeP (nome do produto)
-                    // Insere o produto na tabela
+                    values.put(DESCR, nomeProduto);
                     result = db.insert(TABLE_NAME, null, values);
 
                     if (result != -1) {
@@ -116,11 +124,16 @@ public class DB_handler extends SQLiteOpenHelper {
                     } else {
                         Log.e(TAG, "Erro ao adicionar produto ao banco de dados.");
                     }
+
                 }
 
 
             } catch (Exception e) {
                 Log.e(TAG, "Erro durante a inserção de lista inicial de produtos: ", e);
+            } finally {
+                if (db != null && db.isOpen()) {
+                    db.close();
+                }
             }
         }
 
