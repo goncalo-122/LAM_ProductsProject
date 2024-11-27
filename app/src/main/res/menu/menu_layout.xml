@@ -2,23 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/option1"
-        android:title="@string/todos"/>
+        android:id="@+id/all"
+        android:title="@string/todos"
+        android:onClick="listProd"/>
 
     <item
-        android:id="@+id/option2"
-        android:title="@string/carrinho"/>
+        android:id="@+id/chart"
+        android:title="@string/carrinho"
+        android:onClick="listChart"/>
 
     <item
-        android:id="@+id/option3"
-        android:title="@string/falta"/>
+        android:id="@+id/notChart"
+        android:title="@string/falta"
+        android:onClick="listNotChart"/>
 
     <item
-        android:id="@+id/option4"
-        android:title="@string/ordenar"/>
+        android:id="@+id/order"
+        android:title="@string/ordenar"
+        android:onClick="orderProducts"/>
 
     <item
-        android:id="@+id/option5"
-        android:title="@string/refrescar"/>
+        android:id="@+id/refresh"
+        android:title="@string/refrescar"
+        android:onClick="refresh"/>
 
 </menu>
