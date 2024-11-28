@@ -16,7 +16,7 @@ import java.net.URL;
 class HttpHandler {
     private static final String TAG = HttpHandler.class.getSimpleName();
 
-    String lerInformacao(String urlParam) {
+    String readInfo(String urlParam) {
         String resultado = null;
         URL url;
         HttpURLConnection conn;

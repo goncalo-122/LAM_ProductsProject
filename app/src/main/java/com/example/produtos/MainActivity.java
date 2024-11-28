@@ -1,32 +1,28 @@
 package com.example.produtos;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String SELECTED_OPTION = "SELECTED_OPTION";
-    String url = "https://hostingalunos.upt.pt/~dam/produtos.html";
-    ArrayList<Product> listOfProducts = new ArrayList<>();
-    MyAdapter myAdapter;
-    RecyclerView recyclerView;
-    LinearLayoutManager layoutManager;
-    DB_handler db;
-    ExecutorService executorService;
+    List <Product> products = new ArrayList<>();
+
+    private DBHandler dbHandler;
+    private ProductAdapter adapter;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,50 +32,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        myAdapter = new MyAdapter(listOfProducts);
-        db = new DB_handler(this);
+        dbHandler = new DBHandler(this);
+
+        adapter = new ProductAdapter(products);
+
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setAdapter(myAdapter);
-
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        executorService = Executors.newCachedThreadPool();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
 
         loadProducts();
-    }
-
-    private void loadProducts() {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
-            runOnUiThread(() -> {
-                if (products != null && !products.isEmpty()) {
-                    listOfProducts.clear();
-                    listOfProducts.addAll(products);
-                    myAdapter.notifyDataSetChanged();
-                    Toast.makeText(MainActivity.this, "Produtos carregados com sucesso!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.d("loadProducts", "Nenhum produto encontrado.");
-                    Toast.makeText(MainActivity.this, "Nenhum produto encontrado.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-    }
-
-    private void updateProductList(List<Product> products) {
-        listOfProducts.clear();
-        listOfProducts.addAll(products);
-        myAdapter.notifyDataSetChanged();
-    }
-
-    private List<Product> filterProductsByChart(List<Product> products, boolean inChart) {
-        List<Product> filtered = new ArrayList<>();
-        for (Product product : products) {
-            if (product.isInChart() == inChart) {
-                filtered.add(product);
-            }
-        }
-        return filtered;
     }
 
     @Override
@@ -89,53 +50,89 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void listProd(MenuItem item) {
-        loadProducts();
-    }
-
-    public void listNotChart(MenuItem item) {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
-            List<Product> notInChart = filterProductsByChart(products, false);
-            runOnUiThread(() -> {
-                updateProductList(notInChart);
-                Log.d("listNotChart", "Exibindo produtos fora do carrinho.");
-            });
-        });
-    }
-
-    public void listChart(MenuItem item) {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
-            List<Product> inChart = filterProductsByChart(products, true);
-            runOnUiThread(() -> {
-                updateProductList(inChart);
-                Log.d("listChart", "Exibindo produtos no carrinho.");
-            });
-        });
-    }
-
-    public void orderProducts(MenuItem item) {
-        executorService.execute(() -> {
-            List<Product> products = db.listProducts(url);
-            Collections.sort(products, (p1, p2) -> p1.getDescr().compareToIgnoreCase(p2.getDescr()));
-            runOnUiThread(() -> {
-                updateProductList(products);
-                Log.d("orderProducts", "Produtos ordenados por nome.");
-            });
-        });
-    }
-
-    public void refresh(MenuItem item) {
-        loadProducts();
-        Log.d("refresh", "Lista de produtos atualizada.");
-    }
-
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (executorService != null) {
-            executorService.shutdown();  // Fechar o ExecutorService quando a activity for destruída
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.all:
+                updateRV();
+                Toast.makeText(this, "Todos", Toast.LENGTH_SHORT).show();
+                return true;
+
+            case R.id.cart:
+                List <Product> inCartProducts = new ArrayList<>();
+                for (Product product : products) {
+                    if (product.isInCart()) {
+                        inCartProducts.add(product);
+                    }
+                }
+                updateRV(inCartProducts);
+                Toast.makeText(this, "Produtos no carrinho", Toast.LENGTH_SHORT).show();
+                return true;
+
+            case R.id.notCart:
+                loadProducts();
+
+                Toast.makeText(this, "Falta", Toast.LENGTH_SHORT).show();
+                return true;
+
+            case R.id.order:
+
+            case R.id.refresh: // tá certo
+                dbHandler.clearDatabase();
+                loadProducts();
+
+                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+                return true;
         }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void loadProducts() {
+        new Thread(() -> {
+            HttpHandler httpHandler = new HttpHandler();
+            String url = "https://hostingalunos.upt.pt/~dam/produtos.html";
+            String result = httpHandler.readInfo(url);
+
+            if (result != null) {
+                try {
+                    String[] rows = result.split("\n");
+
+                    dbHandler.clearDatabase();
+                    int i = 0;
+                    for (String row : rows) {
+                        String name = row.trim();
+                        String cleanData = name.replaceAll("<br\\s*/?>", "\n");
+                        if (!name.isEmpty()) {
+                            Product product = new Product(i, cleanData, 0, false);
+                            dbHandler.insertProduct(product);
+                            i++;
+                        }
+                    }
+                    runOnUiThread(() -> {
+                        updateRV();
+                        Toast.makeText(this, "Produtos atualizados com sucesso!", Toast.LENGTH_SHORT).show();
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Erro ao processar produtos.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } else {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Erro ao encontrar produtos.", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    private void updateRV() {
+        products.clear();
+        products.addAll(dbHandler.getAllProducts());
+        adapter.notifyDataSetChanged();
+    }
+
+    private List updateRV(List list) {
+        return list;
     }
 }

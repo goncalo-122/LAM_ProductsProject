@@ -5,13 +5,17 @@ public class Product {
     private int id;
     private String descr;
     private int qtd;
-    private boolean isInChart;
+    private boolean isInCart;
 
-    public Product(int id, String descr, int qtd, boolean isInChart) {
+    public Product (){
+
+    }
+
+    public Product(int id, String descr, int qtd, boolean isInCart) {
         this.id = id;
         this.descr = descr;
         this.qtd = qtd;
-        this.isInChart = isInChart;
+        this.isInCart = isInCart;
     }
 
     public int getId() {
@@ -38,11 +42,11 @@ public class Product {
         this.qtd = qtd;
     }
 
-    public boolean isInChart() {
-        return isInChart;
+    public boolean isInCart() {
+        return isInCart;
     }
 
-    public void setInChart(boolean inChart) {
-        isInChart = inChart;
+    public void setInCart(boolean inCart) {
+        this.isInCart = inCart;
     }
 }

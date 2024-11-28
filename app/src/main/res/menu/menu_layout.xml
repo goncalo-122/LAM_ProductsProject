@@ -3,27 +3,23 @@
 
     <item
         android:id="@+id/all"
-        android:title="@string/todos"
-        android:onClick="listProd"/>
+        android:title="@string/todos" />
 
     <item
-        android:id="@+id/chart"
-        android:title="@string/carrinho"
-        android:onClick="listChart"/>
+        android:id="@+id/cart"
+        android:title="@string/carrinho" />
 
     <item
-        android:id="@+id/notChart"
-        android:title="@string/falta"
-        android:onClick="listNotChart"/>
+        android:id="@+id/notCart"
+        android:title="@string/falta" />
 
     <item
         android:id="@+id/order"
-        android:title="@string/ordenar"
-        android:onClick="orderProducts"/>
+        android:title="@string/ordenar" />
 
     <item
         android:id="@+id/refresh"
         android:title="@string/refrescar"
-        android:onClick="refresh"/>
+        />
 
 </menu>
