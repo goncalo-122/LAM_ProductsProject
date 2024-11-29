@@ -1,6 +1,7 @@
 package com.example.produtos;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     List <Product> products = new ArrayList<>();
 
     private DBHandler dbHandler;
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        loadProducts();
+        updateRecyclerView("T");
     }
 
     @Override
@@ -54,40 +56,37 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.all:
-                updateRV();
-                Toast.makeText(this, "Todos", Toast.LENGTH_SHORT).show();
+                updateProducts("T"); // guardar alterações feitas anteriormente pelo utilizador
+                Toast.makeText(this, "Todos os produtos", Toast.LENGTH_SHORT).show();
                 return true;
 
             case R.id.cart:
-                List <Product> inCartProducts = new ArrayList<>();
-                for (Product product : products) {
-                    if (product.isInCart()) {
-                        inCartProducts.add(product);
-                    }
-                }
-                updateRV(inCartProducts);
+                updateProducts("C"); // guardar alterações feitas anteriormente pelo utilizador
                 Toast.makeText(this, "Produtos no carrinho", Toast.LENGTH_SHORT).show();
                 return true;
 
             case R.id.notCart:
-                loadProducts();
-
-                Toast.makeText(this, "Falta", Toast.LENGTH_SHORT).show();
+                updateProducts("F"); // guardar alterações feitas anteriormente pelo utilizador
+                Toast.makeText(this, "Produtos em falta", Toast.LENGTH_SHORT).show();
                 return true;
 
             case R.id.order:
+                updateProducts("O"); // guardar alterações feitas anteriormente pelo utilizador
+                Toast.makeText(this, "Produtos ordenados alfabeticamente", Toast.LENGTH_SHORT).show();
+                return true;
 
-            case R.id.refresh: // tá certo
-                dbHandler.clearDatabase();
-                loadProducts();
-
-                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+            case R.id.refresh:
+                refresh();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void loadProducts() {
+    /**
+     * Quando for premido um botão “Refrescar”, o método limpa a base de dados,
+     * lê uma lista de produtos do servidor usando HTTP, e insere-a na base de dados.
+     */
+    public void refresh() {
         new Thread(() -> {
             HttpHandler httpHandler = new HttpHandler();
             String url = "https://hostingalunos.upt.pt/~dam/produtos.html";
@@ -97,7 +96,9 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     String[] rows = result.split("\n");
 
-                    dbHandler.clearDatabase();
+                    dbHandler.clearDatabase(); // Limpar base de dados
+
+                    // Ler lista de produtos do servidor HTTP
                     int i = 0;
                     for (String row : rows) {
                         String name = row.trim();
@@ -109,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     runOnUiThread(() -> {
-                        updateRV();
-                        Toast.makeText(this, "Produtos atualizados com sucesso!", Toast.LENGTH_SHORT).show();
+                        updateRecyclerView("T");
+                        Toast.makeText(this, "Produtos refrescados com sucesso!", Toast.LENGTH_SHORT).show();
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -126,13 +127,60 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void updateRV() {
-        products.clear();
-        products.addAll(dbHandler.getAllProducts());
-        adapter.notifyDataSetChanged();
+    /**
+     * @param viewOption tipo de vista que o utilizador selecionou no menu (T - Todos | C - Carrinho | F - Falta | O - Ordenar)
+     * Atualiza na base de dados os novos valores inseridos de quantidade e noCarrinho e atualiza a recyclerView de modo a refletir essas alterações
+     */
+    public void updateProducts(String viewOption) {
+        new Thread(() -> {
+            boolean allUpdated = true;
+
+            // Atualizar produtos na base de dados
+            for (Product product : products) {
+                Log.d(TAG, "Updating product: " + product.getId());
+                boolean updated = dbHandler.updateProduct(product.getId(), product.getQtd(), product.isInCart());
+                if (!updated) {
+                    allUpdated = false;  // Se algum produto não for atualizado, marcar como falha
+                    break;
+                }
+            }
+
+            boolean finalAllUpdated = allUpdated;
+            runOnUiThread(() -> {
+                updateRecyclerView(viewOption); // Atualizar recyclerView
+                if (!finalAllUpdated) {
+                    Toast.makeText(MainActivity.this, "Erro ao atualizar produtos.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }).start();
     }
 
-    private List updateRV(List list) {
-        return list;
+    /**
+     * @param viewOption tipo de vista que o utilizador selecionou no menu (T - Todos | C - Carrinho | F - Falta | O - Ordenar)
+     * Atualiza recyclerView consoante vista selecionada pelo utilizador no menu
+     */
+    private void updateRecyclerView(String viewOption) {
+        switch (viewOption){
+            case "T":
+                products.clear();
+                products.addAll(dbHandler.getAllProducts());
+                adapter.notifyDataSetChanged();
+                break;
+            case"C":
+                products.clear();
+                products.addAll(dbHandler.getProductsInCart());
+                adapter.notifyDataSetChanged();
+                break;
+            case"F":
+                products.clear();
+                products.addAll(dbHandler.getProductsNotInCart());
+                adapter.notifyDataSetChanged();
+                break;
+            case"O":
+                products.clear();
+                products.addAll(dbHandler.getSortedProducts());
+                adapter.notifyDataSetChanged();
+                break;
+        }
     }
 }

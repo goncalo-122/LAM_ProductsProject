@@ -11,13 +11,13 @@ import androidx.recyclerview.widget.RecyclerView;
 public class MyViewHolder extends RecyclerView.ViewHolder {
 
     TextView tvDscr;
-    EditText tvQtd;
+    EditText etQtd;
     CheckBox cbInCart;
 
     public MyViewHolder(@NonNull View itemView) {
         super(itemView);
         tvDscr = itemView.findViewById(R.id.tvDscr);
-        tvQtd = itemView.findViewById(R.id.etQtd);
+        etQtd = itemView.findViewById(R.id.etQtd);
         cbInCart = itemView.findViewById(R.id.checkBox);
     }
 }
